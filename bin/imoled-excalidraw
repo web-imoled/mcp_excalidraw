@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# IMOLED-Bindung an den eigenen Fork.
+# Grund: der Upstream-Skill ruft `npx -y mcp-excalidraw-server` und holt damit Code
+# aus der npm-Registry. Dieser Wrapper faehrt stattdessen den geprueften Bau aus
+# ~/Github/forks/yctimlin--mcp_excalidraw. Updates kommen bewusst ueber
+# `/github-fork update yctimlin/mcp_excalidraw`, nicht still bei jedem Aufruf.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BIN="$REPO/dist/bin.js"
+
+if [ ! -f "$BIN" ]; then
+  echo "imoled-excalidraw: dist fehlt, baue aus $REPO" >&2
+  ( cd "$REPO" && [ -d node_modules ] || npm install --silent )
+  ( cd "$REPO" && npm run build >/dev/null 2>&1 )
+fi
+
+exec node "$BIN" "$@"
